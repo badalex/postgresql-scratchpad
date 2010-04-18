@@ -14,3 +14,8 @@ CONTEXT:  PL/Perl anonymous code block
 CREATE OR REPLACE FUNCTION perl_unicode_regex(text) RETURNS INTEGER AS $$
   return ($_[0] =~ /\x{263A}|happy/i) ? 1 : 0; # unicode smiley
 $$ LANGUAGE plperlu;
+-- check that we cant override signals
+DO $do$ die "__DIE__ is defined" if($SIG{__DIE__}); $do$ LANGUAGE plperlu;
+-- check that we cant modify env
+DO $do$ $ENV{'plperlu_env_test'} = 'test'; $do$ LANGUAGE plperlu;
+DO $do$ die "modified ENV" if($ENV{'plperlu_env_test'}); $do$ LANGUAGE plperlu;

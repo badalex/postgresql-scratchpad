@@ -33,7 +33,16 @@ sub mkfuncsrc {
 	} sort keys %$imports;
 	$BEGIN &&= "BEGIN { $BEGIN }";
 
-	return qq[ package main; sub { $BEGIN $prolog $src } ];
+	return "package main;".
+		# disallow modification of SIG and ENV
+		# this means $SIG{__DIE__} and $SIG{INT}
+		# will not do anything
+		# also disallow modifying ENV, but still allow
+		# them to read it
+		"sub { ".
+		"local *SIG = {};".
+		"local *ENV = {%ENV};".
+		"$BEGIN $prolog $src }";
 }
 
 sub mkfunc {

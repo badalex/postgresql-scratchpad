@@ -391,3 +391,9 @@ DO $do$ use strict; my $name = "foo"; my $ref = $$name; $do$ LANGUAGE plperl;
 -- yields "ERROR:  Useless use of sort in scalar context."
 DO $do$ use warnings FATAL => qw(void) ; my @y; my $x = sort @y; 1; $do$ LANGUAGE plperl;
 
+-- check that we cant override signals
+DO $do$ die "__DIE__ is defined" if($SIG{__DIE__}); $do$ LANGUAGE plperl;
+
+-- check that we cant modify env
+DO $do$ $ENV{'plperl_env_test'} = 'test'; $do$ LANGUAGE plperl;
+DO $do$ die "modified ENV" if($ENV{'plperl_env_test'}); $do$ LANGUAGE plperl;
